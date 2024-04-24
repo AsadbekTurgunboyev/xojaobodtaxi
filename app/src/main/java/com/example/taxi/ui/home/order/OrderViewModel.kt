@@ -141,13 +141,14 @@ class OrderViewModel(private val getMainResponseUseCase: GetMainResponseUseCase)
         _acceptedOrder.postValue(Event(Resource(ResourceState.LOADING)))
         compositeDisposable.add(
             getMainResponseUseCase.acceptOrder(id = id)
-                .timeout(10, TimeUnit.SECONDS)
+                .timeout(30, TimeUnit.SECONDS)
                 .subscribeOn(Schedulers.io())
                 .doOnSubscribe {}
                 .doOnTerminate {}
                 .subscribe({ response ->
                     _acceptedOrder.postValue(Event(Resource(ResourceState.SUCCESS, response)))
                 }, { error ->
+
                     val errorMessage = when (error) {
                         is HttpException -> {
                             try {

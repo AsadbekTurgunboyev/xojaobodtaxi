@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.media.MediaPlayer
 import android.os.Build
 import android.os.Handler
 import android.os.IBinder
@@ -30,9 +31,10 @@ import org.koin.android.ext.android.inject
 import java.util.concurrent.TimeUnit
 
 
-class SocketService : android.app.Service() {
+class SocketService : Service() {
 
     // Initialize your dependencies here, e.g., ViewModel, CoroutineScope, SocketMessageProcessor
+    private  var mediaPlayer: MediaPlayer? = null
 
     private var isAckReceived = true
     private val orderViewModel: OrderViewModel by inject()
@@ -117,6 +119,8 @@ class SocketService : android.app.Service() {
         val notification = Notification() // Replace with your own notification
         startForeground(NOTIFICATION_ID, createNotification())
 
+        mediaPlayer = MediaPlayer.create(this, R.raw.alif_message)
+
         checkAndUpdateCPUWake()
 
         socketRepository = SocketRepository(
@@ -124,7 +128,8 @@ class SocketService : android.app.Service() {
 //            socketViewModel = socketViewModel,
             viewModelScope = CoroutineScope(Dispatchers.IO),
             userPreferenceManager = userPreferenceManager,
-            socketMessageProcessor = socketMessageProcessor
+            socketMessageProcessor = socketMessageProcessor,
+            onMessageReceived = { playSound() }
         )
         locationEngine = LocationEngineProvider.getBestLocationEngine(this)
         startLocationUpdates()
@@ -209,6 +214,7 @@ class SocketService : android.app.Service() {
         socketRepository?.disconnectSocket()
         socketRepository = null
         unregisterReceiver(receiver)
+        releaseMediaPlayer()
         releaseWakelock()
         handler.removeCallbacks(locationSenderRunnable)
     }
@@ -275,6 +281,35 @@ class SocketService : android.app.Service() {
             wakeLock.release()
         }
     }
+
+    private fun playSound() {
+        if (mediaPlayer == null) {
+            mediaPlayer = MediaPlayer.create(this, R.raw.alif_message).apply {
+                setOnCompletionListener {
+                    // Release media player after playback complete
+                    releaseMediaPlayer()
+                }
+                setOnErrorListener { mp, what, extra ->
+                    // Handle error, log it, and optionally retry or release the player
+                    Log.e("MediaPlayer", "Error occurred: What $what, Extra $extra")
+                    releaseMediaPlayer()
+                    true  // Return true if the error was handled
+                }
+            }
+        }
+        try {
+            mediaPlayer?.start()
+        } catch (e: IllegalStateException) {
+            Log.e("MediaPlayer", "Failed to start mediaPlayer: ${e.message}")
+            releaseMediaPlayer()  // Attempt to release and reset media player if it fails to start
+        }
+    }
+
+    private fun releaseMediaPlayer() {
+        mediaPlayer?.release()
+        mediaPlayer = null
+    }
+
 
     private fun acquireWakeLock() {
         if (wakeLock.isHeld.not()) {

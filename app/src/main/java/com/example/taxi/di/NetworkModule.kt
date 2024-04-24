@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit
 
 
 private const val TIME_OUT = 30L
-const val MAIN = "my.baraka-taxi.uz"
+const val MAIN = "texnodev.lidertaxi.uz"
 const val MAIN_URL: String = "https://$MAIN"
 const val BASE_URL: String = "$MAIN_URL/api/driver/"
 val NetworkModule = module {

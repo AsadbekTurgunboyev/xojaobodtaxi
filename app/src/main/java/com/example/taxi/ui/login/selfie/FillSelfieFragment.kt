@@ -30,7 +30,8 @@ import com.example.taxi.utils.ResourceState
 import com.tapadoo.alerter.Alerter
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class FillSelfieFragment : Fragment(), ImagePickerResultListener {
+
+class FillSelfieFragment : Fragment() {
     lateinit var viewBinding: FragmentFillSelfieBinding
     private val selfieViewModel: SelfieViewModel by viewModel()
 
@@ -61,9 +62,33 @@ class FillSelfieFragment : Fragment(), ImagePickerResultListener {
                 }
             }
         }
-    private val uploadImageLicense: ImagePicker by lazy {
-        registerImagePicker(this)
+    private val starForLicenseImageResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
+        val resultCode = result.resultCode
+        val data = result.data
+
+        when (resultCode) {
+            Activity.RESULT_OK -> {
+                //Image Uri will not be null for RESULT_OK
+                val fileUri = data?.data!!
+
+                mLicenseUri = fileUri
+                viewBinding.uploadImgLicense.setImageURI(fileUri)
+            }
+            com.github.dhaval2404.imagepicker.ImagePicker.RESULT_ERROR -> {
+                Toast.makeText(
+                    requireContext(),
+                    com.github.dhaval2404.imagepicker.ImagePicker.getError(data),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+            else -> {
+                Toast.makeText(requireContext(), "Bekor qilindi!", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
+
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -77,12 +102,14 @@ class FillSelfieFragment : Fragment(), ImagePickerResultListener {
                 ResourceState.LOADING -> {
                     activity?.let { it1 ->
                         Alerter.create(it1).setTitle("Yuklanmoqda...")
+                            .setDuration(60000)
                             .setText("Siz belgilangan rasmlar yuklanmoqda, bu biroz vaqtni olishi mumkin")
                             .enableProgress(true).setProgressColorRes(R.color.primaryColor).show()
                     }
                 }
                 ResourceState.SUCCESS -> {
                     selfieViewModel.clearFile()
+                    Alerter.clearCurrent(activity)
                     resource.data?.let { complete ->
                         if (complete.data.is_completed.string) {
                             UserPreferenceManager(requireContext()).setRegisterComplete()
@@ -97,6 +124,7 @@ class FillSelfieFragment : Fragment(), ImagePickerResultListener {
                 }
                 ResourceState.ERROR -> {
                     selfieViewModel.clearFile()
+                    Alerter.clearCurrent(activity)
                     DialogUtils.createChangeDialog(
                         activity = requireActivity(),
                         title = "Xatolik",
@@ -128,7 +156,12 @@ class FillSelfieFragment : Fragment(), ImagePickerResultListener {
             }
 
             uploadLicense.setOnClickListener {
-                uploadImageLicense.open(PickerType.CAMERA)
+                com.github.dhaval2404.imagepicker.ImagePicker.with(requireActivity()).cameraOnly()
+                    .cropSquare().compress(1024)
+                    .maxResultSize(1080, 1080) //com.example.taxi.domain.model.history.com.example.taxi.domain.model.history.com.example.taxi.domain.model.history.User can only capture image using Camera
+                    .createIntent { intent ->
+                        starForLicenseImageResult.launch(intent)
+                    }
             }
 
             uploadSelfie.setOnClickListener {
@@ -152,21 +185,12 @@ class FillSelfieFragment : Fragment(), ImagePickerResultListener {
     }
 
     private fun initVar() {
-        uploadImageLicense.title("Haydovchilik guvohnomasi")
-            .multipleSelection(enable = false, maxCount = 5).showCountInToolBar(false)
-            .showFolder(true).cameraIcon(true).doneIcon(true).allowCropping(true)
-            .compressImage(false).maxImageSize(1).extension(PickExtension.JPEG)
-    }
-
-
-    override fun onImagePick(uri: Uri?) {
-        viewBinding.uploadImgLicense.setImageURI(uri)
-        mLicenseUri = uri!!
-    }
-
-    override fun onMultiImagePick(uris: List<Uri>?) {
 
     }
+
+
+
 
 
 }
+

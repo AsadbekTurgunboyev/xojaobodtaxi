@@ -180,7 +180,8 @@ class DashboardFragment : Fragment() {
 //            socketViewModel = socketViewModel,
             socketMessageProcessor = socketMessageProcessor,
             userPreferenceManager = userPreferenceManager,
-            viewModelScope = socketViewModel.viewModelScope
+            viewModelScope = socketViewModel.viewModelScope,
+            onMessageReceived = {}
         )
 
 
