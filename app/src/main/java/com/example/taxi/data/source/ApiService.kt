@@ -143,7 +143,7 @@ interface ApiService {
     fun getFAQ(): Observable<MainResponse<ResponseAbout>>
 
     @GET("order/current")
-    fun getOrderCurrent(): Observable<MainResponse<Any>>
+    fun getOrderCurrent(): Observable<MainResponse<OrderAccept<UserModel>>>
 
     @GET("bonus/transfer")
     fun getTransferBonus(

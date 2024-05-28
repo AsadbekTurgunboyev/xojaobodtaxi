@@ -1,9 +1,12 @@
 package com.example.taxi.network
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.taxi.domain.model.MainResponse
+import com.example.taxi.domain.model.order.OrderAccept
+import com.example.taxi.domain.model.order.UserModel
 import com.example.taxi.domain.usecase.main.GetMainResponseUseCase
 import com.example.taxi.utils.Resource
 import com.example.taxi.utils.ResourceState
@@ -14,23 +17,33 @@ import retrofit2.HttpException
 
 const val IS_CONNECT = "isConnect"
 const val NO_CONNECT = "noConnect"
+
+
 class NetworkViewModel(private val getMainResponseUseCase: GetMainResponseUseCase) : ViewModel() {
     private val compositeDisposable = CompositeDisposable()
 
     private val _response = MutableLiveData<Resource<String>>()
     val response: LiveData<Resource<String>> get() = _response
+    private val _driverStatus = MutableLiveData<Resource<MainResponse<OrderAccept<UserModel>>?>?>()
+    val driverStatus: LiveData<Resource<MainResponse<OrderAccept<UserModel>>?>?> get() = _driverStatus
 
+    fun resetData() {
+        _driverStatus.value = null
+    }
     fun getOrderCurrent() {
         _response.postValue(Resource(ResourceState.LOADING))
+        _driverStatus.postValue(Resource(ResourceState.LOADING))
 
         compositeDisposable.add(getMainResponseUseCase.getOrderCurrent()
             .subscribeOn(Schedulers.io())
             .doOnSubscribe {
                 // Perform any setup tasks before the subscription starts
             }.doOnTerminate {}.subscribe({ response ->
+                Log.d("buyurtma", "getOrderCurrent: $response")
+                _driverStatus.postValue(Resource(ResourceState.SUCCESS,response))
                 _response.postValue(Resource(ResourceState.SUCCESS, IS_CONNECT))
             }, { error ->
-
+                Log.e("buyurtma", "getOrderCurrent: $error", )
                 val errorMessage = if (error is HttpException) {
                     try {
                         val errorBody = error.response()?.errorBody()?.string()
@@ -53,6 +66,7 @@ class NetworkViewModel(private val getMainResponseUseCase: GetMainResponseUseCas
                         message = errorMessage
                     )
                 )
+                _driverStatus.postValue(Resource(ResourceState.ERROR, message = errorMessage))
 
             })
         )

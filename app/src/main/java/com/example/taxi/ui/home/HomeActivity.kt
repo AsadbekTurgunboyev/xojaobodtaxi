@@ -266,8 +266,8 @@ class HomeActivity : AppCompatActivity(), ServiceConnection {
 
     override fun onStart() {
         super.onStart()
+//        networkViewModel.getOrderCurrent()
 
-        Log.d("mening", "onStart: ${userPreferenceManager.getToken()}")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(
                     this, Manifest.permission.POST_NOTIFICATIONS
@@ -277,61 +277,47 @@ class HomeActivity : AppCompatActivity(), ServiceConnection {
             }
         }
 
-            if (userPreferenceManager.getIsOrderCancel()) {
-                val d = DialogUtils.orderCancelDialog(this)
-                d.show()
-                if (d.isShowing) {
-                    userPreferenceManager.setIsOrderCancel(false)
-                }
+        if (userPreferenceManager.getIsOrderCancel()) {
+            val d = DialogUtils.orderCancelDialog(this)
 
+            d.show()
+            if (d.isShowing) {
+                userPreferenceManager.setIsOrderCancel(false)
             }
-            bindService(
-                Intent(this, DriveBackGroundService::class.java), this, Context.BIND_AUTO_CREATE
-            )
-            val currentDestinationId = navController.currentDestination?.id
-            if (userPreferenceManager.getStatusIsTaximeter()) {
+
+        }
+        bindService(
+            Intent(this, DriveBackGroundService::class.java), this, Context.BIND_AUTO_CREATE
+        )
+        Log.d("taxometr", "onStart: ${userPreferenceManager.getStatusIsTaximeter()}")
+        val currentDestinationId = navController.currentDestination?.id
+        if (userPreferenceManager.getStatusIsTaximeter()) {
+            driverViewModel.completeTaximeter()
+            viewModel.startDrive()
+            val bundle = Bundle()
+            Log.d("taxometr", "updateStatus: ip")
+
+            bundle.putBoolean("is_taxo", true)
+//            navController.navigate(R.id.taximeterFragment, bundle)
+
+        } else {
+            if (currentDestinationId != R.id.driverFragment) {
                 if (userPreferenceManager.getDriverStatus() != UserPreferenceManager.DriverStatus.COMPLETED) {
+
                     when (userPreferenceManager.getDriverStatus()) {
                         UserPreferenceManager.DriverStatus.STARTED -> {
-                            Log.d("taxometer", "onStart: start")
                             driverViewModel.startedOrder()
-                            Log.d("xatolik", "onStart:start ishladi ")
                         }
 
-                        UserPreferenceManager.DriverStatus.ARRIVED -> {
-                            driverViewModel.arrivedOrder()
-                            Log.d("taxometer", "onStart: arrive")
-
-                        }
-
-                        UserPreferenceManager.DriverStatus.ACCEPTED -> {
-                            driverViewModel.acceptedOrder()
-                            Log.d("taxometer", "onStart: accept")
-
-                        }
-
+                        UserPreferenceManager.DriverStatus.ARRIVED -> driverViewModel.arrivedOrder()
+                        UserPreferenceManager.DriverStatus.ACCEPTED -> driverViewModel.acceptedOrder()
                         else -> {}
                     }
-                    navController.navigate(R.id.taximeterFragment)
-                }
-            } else {
-                if (currentDestinationId != R.id.driverFragment) {
-                    if (userPreferenceManager.getDriverStatus() != UserPreferenceManager.DriverStatus.COMPLETED) {
-                        when (userPreferenceManager.getDriverStatus()) {
-                            UserPreferenceManager.DriverStatus.STARTED -> {
-                                driverViewModel.startedOrder()
-                                Log.d("xatolik", "onStart:start ishladi ")
-                            }
-
-                            UserPreferenceManager.DriverStatus.ARRIVED -> driverViewModel.arrivedOrder()
-                            UserPreferenceManager.DriverStatus.ACCEPTED -> driverViewModel.acceptedOrder()
-                            else -> {}
-                        }
-                        navController.navigate(R.id.driverFragment)
-                    }
+                    navController.navigate(R.id.driverFragment)
                 }
             }
         }
+    }
 
         override fun onDestroy() {
             super.onDestroy()

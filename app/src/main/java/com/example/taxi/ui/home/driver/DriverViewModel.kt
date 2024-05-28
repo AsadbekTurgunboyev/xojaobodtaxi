@@ -31,6 +31,8 @@ class DriverViewModel(private val mainResponseUseCase: GetMainResponseUseCase) :
         value = DriveAction.ACCEPT
     }
 
+    val orderSCTaximeter = MutableLiveData<Int>()
+
 
     private val _transferWithBonus = MutableLiveData<Resource<MainResponse<BonusResponse>>>()
     val transferWithBonus: LiveData<Resource<MainResponse<BonusResponse>>> get() = _transferWithBonus
@@ -174,43 +176,43 @@ class DriverViewModel(private val mainResponseUseCase: GetMainResponseUseCase) :
 
 
     fun acceptWithTaximeter(){
-            _acceptWithTaximeter.postValue(Event(Resource(ResourceState.LOADING)))
-            compositeDisposable.add(
-                mainResponseUseCase.acceptWithTaximeter()
-                    .timeout(10, TimeUnit.SECONDS)
-                    .subscribeOn(Schedulers.io())
-                    .doOnSubscribe {}
-                    .doOnTerminate {}
-                    .subscribe({ response ->
-                        Log.d("zakaz", "acceptWithTaximeter:re  $response")
-                        _acceptWithTaximeter.postValue(Event(Resource(ResourceState.SUCCESS, response)))
-                    }, { error ->
-                        Log.d("zakaz", "acceptWithTaximeter:e  $error")
+        _acceptWithTaximeter.postValue(Event(Resource(ResourceState.LOADING)))
+        compositeDisposable.add(
+            mainResponseUseCase.acceptWithTaximeter()
+                .timeout(10, TimeUnit.SECONDS)
+                .subscribeOn(Schedulers.io())
+                .doOnSubscribe {}
+                .doOnTerminate {}
+                .subscribe({ response ->
+                    Log.d("zakaz", "acceptWithTaximeter:re  $response")
+                    _acceptWithTaximeter.postValue(Event(Resource(ResourceState.SUCCESS, response)))
+                }, { error ->
+                    Log.d("zakaz", "acceptWithTaximeter:e  $error")
 
-                        val errorMessage = when (error) {
-                            is HttpException -> {
-                                try {
-                                    val errorBody = error.response()?.errorBody()?.string()
-                                    val mainResponse = Gson().fromJson(errorBody, MainResponse::class.java)
-                                    mainResponse.message
-                                } catch (e: Exception) {
-                                    R.string.cannot_connect_to_server
-                                }
+                    val errorMessage = when (error) {
+                        is HttpException -> {
+                            try {
+                                val errorBody = error.response()?.errorBody()?.string()
+                                val mainResponse = Gson().fromJson(errorBody, MainResponse::class.java)
+                                mainResponse.message
+                            } catch (e: Exception) {
+                                R.string.cannot_connect_to_server
                             }
-                            is IOException -> R.string.no_internet
-                            else -> R.string.unknow_error
                         }
-                        _acceptWithTaximeter.postValue(
-                            Event(
-                                Resource(
-                                    ResourceState.ERROR,
-                                    message = errorMessage.toString()
-                                )
+                        is IOException -> R.string.no_internet
+                        else -> R.string.unknow_error
+                    }
+                    _acceptWithTaximeter.postValue(
+                        Event(
+                            Resource(
+                                ResourceState.ERROR,
+                                message = errorMessage.toString()
                             )
                         )
+                    )
 
-                    })
-            )
+                })
+        )
 
     }
 
@@ -274,6 +276,13 @@ class DriverViewModel(private val mainResponseUseCase: GetMainResponseUseCase) :
 
     fun  completedOrder() {
         orderStartCompleteLiveData.postValue(DriveAction.COMPLETED)
+    }
+
+    fun acceptTaximeter(){
+        orderSCTaximeter.postValue(DriveAction.TAX_STARTED)
+    }
+    fun completeTaximeter(){
+        orderSCTaximeter.postValue(DriveAction.TAX_COMPLETED)
     }
 
 

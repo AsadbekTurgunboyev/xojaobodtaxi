@@ -82,7 +82,7 @@ interface MainRepository {
 
     fun getAbout(): Observable<MainResponse<ResponseAbout>>
     fun getFAQ(): Observable<MainResponse<ResponseAbout>>
-    fun getCurrentOrder(): Observable<MainResponse<Any>>
+    fun getCurrentOrder(): Observable<MainResponse<OrderAccept<UserModel>>>
 
     fun transferWithBonus(order_id: Int, money: Int): Observable<MainResponse<BonusResponse>>
 
