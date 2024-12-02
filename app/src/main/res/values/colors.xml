@@ -10,7 +10,7 @@
     <color name="only_white">#000</color>
     <color name="oq">#fff</color>
     <color name="primaryColor">#FFB200</color>
-    <color name="blue">#407BFF</color>
+    <color name="blue">#2196F3</color>
     <color name="grey">#B3929294</color>
     <color name="tblue">#29B6F6</color>
     <color name="yellow">#F6BB42</color>
@@ -33,12 +33,20 @@
 
     <color name="background_dashboard">#F8F9F8</color>
 
-    <color name="card_color">#fff</color>
+
+    <color name="card_color">#FFF</color>
     <color name="active_order_color">#888888</color>
     <color name="menu_color">#1C1C1E</color>
 
     <color name="text_black_white">#000</color>
     <color name="date_picker_background">#F7F7F8</color>
+
+
+    <color name="buyurtmalar">#26C6DA</color>
+    <color name="balans">#76D17B</color>
+    <color name="chiqish">#FF5858</color>
+    <color name="tarix">#FFB74D</color>
+
 
 
 </resources>

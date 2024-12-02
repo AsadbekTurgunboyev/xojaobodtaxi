@@ -41,13 +41,11 @@
                 android:layout_centerVertical="true"
                 android:layout_height="@dimen/_30sdp">
                 <ImageView
-
                     android:layout_width="@dimen/_26sdp"
                     android:layout_height="@dimen/_26sdp"
 
                     android:layout_gravity="center"
                     android:contentDescription="@string/icon"
-
                     android:src="@drawable/ic_menu" />
 
                 <com.google.android.material.card.MaterialCardView
@@ -75,6 +73,7 @@
                 android:layout_width="@dimen/_100sdp"
 
                 android:layout_height="wrap_content"
+
                 android:layout_centerInParent="true"
                 android:layout_marginStart="@dimen/_10sdp"
                 android:layout_marginTop="@dimen/_10sdp"
@@ -82,7 +81,6 @@
                 android:layout_marginBottom="@dimen/_10sdp"
                 android:paddingHorizontal="@dimen/_20sdp"
                 android:textSize="@dimen/_16ssp"
-
                 app:colorBorder="@color/blue"
                 app:colorOn="@color/blue"
                 app:on="false"
@@ -96,7 +94,7 @@
                 android:layout_marginEnd="@dimen/_10sdp"
                 android:layout_toStartOf="@id/call_btn"
                 android:background="@drawable/shape_cirlce_active"
-                android:backgroundTint="@color/red" />
+                android:backgroundTint="@color/chiqish" />
 
             <ImageView
                 android:id="@+id/call_btn"
@@ -233,7 +231,7 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:backgroundTint="@color/yellow"
+            android:backgroundTint="@color/balans"
 
             app:cardCornerRadius="@dimen/_8sdp"
             app:cardElevation="@dimen/_3sdp"
@@ -285,6 +283,7 @@
                             android:textStyle="bold" />
 
                        <ProgressBar
+                           android:indeterminateTint="@color/blue"
                            android:id="@+id/total_balance_loading"
                            android:layout_width="@dimen/_24sdp"
                            android:layout_gravity="center"
@@ -302,7 +301,7 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             app:cardCornerRadius="@dimen/_8sdp"
-            app:cardBackgroundColor="@color/card_color"
+            app:cardBackgroundColor="@color/tarix"
 
             app:cardElevation="@dimen/_3sdp"
             app:layout_constraintBottom_toTopOf="@+id/guideline18"
@@ -328,6 +327,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/tarix"
+                    android:textColor="@color/white"
                     android:textAppearance="@style/TextAppearance.AppCompat.Large" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -335,7 +335,7 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:backgroundTint="@color/red"
+            android:backgroundTint="@color/chiqish"
             android:clickable="true"
             android:focusable="true"
             android:background="?selectableItemBackground"
@@ -398,7 +398,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            app:layout_constraintGuide_percent=".32" />
+            app:layout_constraintGuide_begin="210dp" />
 
 
         <androidx.constraintlayout.widget.Guideline

@@ -5,7 +5,7 @@
     <color name="card_color">#4f4f4f</color>
     <color name="red">#f69c88</color>
     <color name="yellow">#fed184</color>
-    <color name="blue">#91a4ff</color>
+    <color name="blue">#2196F3</color>
     <color name="active_order_color">#B7BCBD</color>
     <color name="menu_color">#575757</color>
     <color name="color_text_orders">#a6b3ff</color>
@@ -17,8 +17,9 @@
     <color name="background_driver_is_order">#393939</color>
 
 
-
-
+    <color name="buyurtmalar">#26C6DA</color>
+    <color name="balans">#69C26D</color>
+    <color name="chiqish">#D32F2F</color>
 
 
 </resources>
