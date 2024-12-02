@@ -11,6 +11,7 @@ import com.example.taxi.domain.exception.traceErrorException
 import com.example.taxi.domain.model.MainResponse
 import com.example.taxi.domain.model.location.LocationRequest
 import com.example.taxi.domain.model.order.Address
+import com.example.taxi.domain.model.order.MileageData
 import com.example.taxi.domain.model.order.OrderAccept
 import com.example.taxi.domain.model.order.OrderData
 import com.example.taxi.domain.model.order.UserModel
@@ -45,8 +46,8 @@ class OrderViewModel(private val getMainResponseUseCase: GetMainResponseUseCase)
     }
 
     private var _acceptedOrder =
-        MutableLiveData<Event<Resource<MainResponse<OrderAccept<UserModel>>>>>()
-    val acceptOrder: LiveData<Event<Resource<MainResponse<OrderAccept<UserModel>>>>> get() = _acceptedOrder
+        MutableLiveData<Event<Resource<MainResponse<OrderAccept<UserModel, MileageData>>>>>()
+    val acceptOrder: LiveData<Event<Resource<MainResponse<OrderAccept<UserModel,MileageData>>>>> get() = _acceptedOrder
 
     private var _ordersCount = MutableLiveData<Int>().apply {
         value = 0
@@ -149,6 +150,7 @@ class OrderViewModel(private val getMainResponseUseCase: GetMainResponseUseCase)
                     _acceptedOrder.postValue(Event(Resource(ResourceState.SUCCESS, response)))
                 }, { error ->
 
+                    Log.d("xabar", "acceptOrder: ${error.message}")
                     val errorMessage = when (error) {
                         is HttpException -> {
                             try {

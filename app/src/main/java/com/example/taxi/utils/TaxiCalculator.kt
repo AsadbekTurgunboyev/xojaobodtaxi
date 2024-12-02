@@ -4,6 +4,7 @@ import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import com.example.taxi.domain.model.DashboardData
+import com.example.taxi.domain.model.order.MileageData
 import com.example.taxi.domain.preference.UserPreferenceManager
 import kotlin.math.roundToInt
 
@@ -16,20 +17,44 @@ object TaxiCalculator {
         preferenceManager: UserPreferenceManager,
         secondsElapsed: Long
     ) :String{
+
+        val moneyTotalDistance = preferenceManager.loadMileageData()
+
+        Log.d("orta", "getCurrentDriveCost: ${dashboardData.getDistanceText()}")
         val waitTime = ((preferenceManager.getFinishedTimeAcceptOrder() - preferenceManager.getTransitionTime()) / 1000).toInt() + secondsElapsed
-        Log.d("tekshirishuchun", "getCurrentDriveCost: wait time $waitTime")
-        Log.d("tekshirishuchun", "getCurrentDriveCost: oraliq ${(preferenceManager.getFinishedTimeAcceptOrder() - preferenceManager.getTransitionTime()) / 1000}")
-        val currentDriveCost: Int = if (dashboardData.getDistanceText() >= dashboardData.convertToKm(preferenceManager.getMinDistance())) {
-            val a = dashboardData.getDistanceText() - dashboardData.convertToKm(preferenceManager.getMinDistance())
-            val addPrice = a * preferenceManager.getCostPerKm()
+        val currentDriveCost: Int? = moneyTotalDistance?.let { calculateTotalCost(it,dashboardData.getDistanceText() * 1000).toInt() }
 //            plus((waitTime / 60.0) * preferenceManager.getCostWaitTimePerMinute()
-            preferenceManager.getStartCost().plus(addPrice).roundToInt()
-        } else {
-            preferenceManager.getStartCost()
-        }
-        return PhoneNumberUtil.formatMoneyNumberPlate(roundToNearestMultiple(currentDriveCost).toString())
+
+        return PhoneNumberUtil.formatMoneyNumberPlate(currentDriveCost.toString())
     }
 
+
+    fun calculateTotalCost(mileagePrices: List<MileageData>, remainingDistance: Double): Double {
+        var remainingDistanceVar = remainingDistance.toDouble()
+        var previousKm = 0.0
+        var totalCost = 0.0
+
+        if (mileagePrices.isNotEmpty()) {
+            for (mileagePrice in mileagePrices) {
+                val currentKm = mileagePrice.value * 1000.0 // value in meters
+                val distanceToConsider = minOf(remainingDistanceVar, currentKm - previousKm)
+                totalCost += (distanceToConsider / 1000) * mileagePrice.price
+                remainingDistanceVar -= distanceToConsider
+                previousKm = currentKm
+                if (remainingDistanceVar <= 0) {
+                    break
+                }
+            }
+            if (remainingDistanceVar > 0) {
+                val lastMileagePrice = mileagePrices.last()
+                val standardPricePerKm = lastMileagePrice.price
+                totalCost += (remainingDistanceVar / 1000) * standardPricePerKm
+            }
+            totalCost = kotlin.math.round(totalCost / 500) * 500
+        }
+
+        return totalCost
+    }
      fun roundToNearestMultiple(number: Int): Int {
        val multiple = 500
         val remainder = number % multiple

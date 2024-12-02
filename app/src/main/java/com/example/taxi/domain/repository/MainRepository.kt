@@ -12,6 +12,7 @@ import com.example.taxi.domain.model.history.Meta
 import com.example.taxi.domain.model.location.LocationRequest
 import com.example.taxi.domain.model.message.MessageResponse
 import com.example.taxi.domain.model.order.Address
+import com.example.taxi.domain.model.order.MileageData
 import com.example.taxi.domain.model.order.OrderAccept
 import com.example.taxi.domain.model.order.OrderCompleteRequest
 import com.example.taxi.domain.model.order.OrderData
@@ -45,9 +46,9 @@ interface MainRepository {
 
     fun getOrders(): Observable<MainResponse<List<OrderData<Address>>>>
 
-    fun orderAccept(id: Int): Observable<MainResponse<OrderAccept<UserModel>>>
+    fun orderAccept(id: Int): Observable<MainResponse<OrderAccept<UserModel, MileageData>>>
 
-    fun orderWithTaximeter(): Observable<MainResponse<OrderAccept<UserModel>>>
+    fun orderWithTaximeter(): Observable<MainResponse<OrderAccept<UserModel,MileageData>>>
 
     fun arrivedOrder(): Observable<MainResponse<Any>>
 
@@ -82,7 +83,7 @@ interface MainRepository {
 
     fun getAbout(): Observable<MainResponse<ResponseAbout>>
     fun getFAQ(): Observable<MainResponse<ResponseAbout>>
-    fun getCurrentOrder(): Observable<MainResponse<OrderAccept<UserModel>>>
+    fun getCurrentOrder(): Observable<MainResponse<OrderAccept<UserModel,MileageData>>>
 
     fun transferWithBonus(order_id: Int, money: Int): Observable<MainResponse<BonusResponse>>
 

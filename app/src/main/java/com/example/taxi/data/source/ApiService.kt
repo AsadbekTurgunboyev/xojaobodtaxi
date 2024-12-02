@@ -93,10 +93,10 @@ interface ApiService {
     fun setService(@Body request: ModeRequest): Observable<ModeResponse>
 
     @POST("order/accept")
-    fun orderAccept(@Query("id") id: Int): Observable<MainResponse<OrderAccept<UserModel>>>
+    fun orderAccept(@Query("id") id: Int): Observable<MainResponse<OrderAccept<UserModel,MileageData>>>
 
     @POST("order/taximeter")
-    fun orderWithTaximeter(): Observable<MainResponse<OrderAccept<UserModel>>>
+    fun orderWithTaximeter(): Observable<MainResponse<OrderAccept<UserModel,MileageData>>>
 
     @POST("order/arrived")
     fun arrivedOrder(): Observable<MainResponse<Any>>
@@ -143,7 +143,7 @@ interface ApiService {
     fun getFAQ(): Observable<MainResponse<ResponseAbout>>
 
     @GET("order/current")
-    fun getOrderCurrent(): Observable<MainResponse<OrderAccept<UserModel>>>
+    fun getOrderCurrent(): Observable<MainResponse<OrderAccept<UserModel,MileageData>>>
 
     @GET("bonus/transfer")
     fun getTransferBonus(

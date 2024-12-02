@@ -13,6 +13,7 @@ import com.example.taxi.domain.model.history.Meta
 import com.example.taxi.domain.model.location.LocationRequest
 import com.example.taxi.domain.model.message.MessageResponse
 import com.example.taxi.domain.model.order.Address
+import com.example.taxi.domain.model.order.MileageData
 import com.example.taxi.domain.model.order.OrderAccept
 import com.example.taxi.domain.model.order.OrderCompleteRequest
 import com.example.taxi.domain.model.order.OrderData
@@ -63,11 +64,11 @@ class MainRepositoryImpl(private val apiService: ApiService) : MainRepository {
         return apiService.getOrders()
     }
 
-    override fun orderAccept(id: Int): Observable<MainResponse<OrderAccept<UserModel>>> {
+    override fun orderAccept(id: Int): Observable<MainResponse<OrderAccept<UserModel, MileageData>>> {
         return apiService.orderAccept(id = id)
     }
 
-    override fun orderWithTaximeter(): Observable<MainResponse<OrderAccept<UserModel>>> {
+    override fun orderWithTaximeter(): Observable<MainResponse<OrderAccept<UserModel,MileageData>>> {
         return apiService.orderWithTaximeter()
     }
 
@@ -136,7 +137,7 @@ class MainRepositoryImpl(private val apiService: ApiService) : MainRepository {
         return apiService.getFAQ()
     }
 
-    override fun getCurrentOrder(): Observable<MainResponse<OrderAccept<UserModel>>> {
+    override fun getCurrentOrder(): Observable<MainResponse<OrderAccept<UserModel,MileageData>>> {
         return apiService.getOrderCurrent()
     }
 

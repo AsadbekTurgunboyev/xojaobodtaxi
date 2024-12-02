@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName
 
 
 
-data class OrderAccept<U>(
+data class OrderAccept<U,T>(
     val id: Int,
     val type: Type,
     val services: List<Service>,
@@ -20,7 +20,8 @@ data class OrderAccept<U>(
     val user: U,
     @SerializedName("mode") val mode: ModeModel,
     val activeHistory: Any?,
-    val settings: List<Settings>
+    val settings: List<Settings>,
+    val mileage_prices: List<T>
 ) {
 
     fun getSum(): Int {
@@ -68,6 +69,14 @@ data class UserModel(
         return phone
     }
 }
+
+data class MileageData(
+    val id: Int,
+    val mode_id: Int,
+    val value: Int,
+    val price: Int,
+    val price_out_center: Int
+)
 
 data class ModeModel(
     @SerializedName("number") val number: Int,

@@ -8,6 +8,7 @@ import com.example.taxi.R
 import com.example.taxi.domain.exception.traceErrorException
 import com.example.taxi.domain.model.BonusResponse
 import com.example.taxi.domain.model.MainResponse
+import com.example.taxi.domain.model.order.MileageData
 import com.example.taxi.domain.model.order.OrderAccept
 import com.example.taxi.domain.model.order.OrderCompleteRequest
 import com.example.taxi.domain.model.order.UserModel
@@ -37,8 +38,8 @@ class DriverViewModel(private val mainResponseUseCase: GetMainResponseUseCase) :
     private val _transferWithBonus = MutableLiveData<Resource<MainResponse<BonusResponse>>>()
     val transferWithBonus: LiveData<Resource<MainResponse<BonusResponse>>> get() = _transferWithBonus
 
-    private var _acceptWithTaximeter = MutableLiveData<Event<Resource<MainResponse<OrderAccept<UserModel>>>>>()
-    val acceptWithTaximeter:LiveData<Event<Resource<MainResponse<OrderAccept<UserModel>>>>> get() = _acceptWithTaximeter
+    private var _acceptWithTaximeter = MutableLiveData<Event<Resource<MainResponse<OrderAccept<UserModel, MileageData>>>>>()
+    val acceptWithTaximeter:LiveData<Event<Resource<MainResponse<OrderAccept<UserModel,MileageData>>>>> get() = _acceptWithTaximeter
 
     private var _startOrder = MutableLiveData<Resource<MainResponse<Any>>>()
     val startOrder: LiveData<Resource<MainResponse<Any>>> = _startOrder

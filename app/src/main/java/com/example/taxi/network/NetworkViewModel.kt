@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.taxi.domain.model.MainResponse
+import com.example.taxi.domain.model.order.MileageData
 import com.example.taxi.domain.model.order.OrderAccept
 import com.example.taxi.domain.model.order.UserModel
 import com.example.taxi.domain.usecase.main.GetMainResponseUseCase
@@ -24,8 +25,8 @@ class NetworkViewModel(private val getMainResponseUseCase: GetMainResponseUseCas
 
     private val _response = MutableLiveData<Resource<String>>()
     val response: LiveData<Resource<String>> get() = _response
-    private val _driverStatus = MutableLiveData<Resource<MainResponse<OrderAccept<UserModel>>?>?>()
-    val driverStatus: LiveData<Resource<MainResponse<OrderAccept<UserModel>>?>?> get() = _driverStatus
+    private val _driverStatus = MutableLiveData<Resource<MainResponse<OrderAccept<UserModel, MileageData>>?>?>()
+    val driverStatus: LiveData<Resource<MainResponse<OrderAccept<UserModel,MileageData>>?>?> get() = _driverStatus
 
     fun resetData() {
         _driverStatus.value = null

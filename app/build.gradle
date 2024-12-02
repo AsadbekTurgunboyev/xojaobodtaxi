@@ -15,11 +15,11 @@ android {
 
     defaultConfig {
 //        uz.insoft.AlifTaxi
-        applicationId "uz.insoft.bonuxtaxi_driver"
+        applicationId "uz.insoft.xojabod_driver"
         minSdk 24
         targetSdk 33
-        versionCode 53
-        versionName "8.4.23"
+        versionCode 54
+        versionName "8.7.25"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 

@@ -13,6 +13,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
+import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -26,6 +27,7 @@ import com.example.taxi.databinding.FragmentOrderBinding
 import com.example.taxi.domain.model.MainResponse
 import com.example.taxi.domain.model.map.MapLocation
 import com.example.taxi.domain.model.order.Address
+import com.example.taxi.domain.model.order.MileageData
 import com.example.taxi.domain.model.order.OrderAccept
 import com.example.taxi.domain.model.order.OrderData
 import com.example.taxi.domain.model.order.UserModel
@@ -95,7 +97,7 @@ class OrderFragment : Fragment(), BottomSheetInterface {
 
     }
 
-    private fun acceptedOrder(event: Event<Resource<MainResponse<OrderAccept<UserModel>>>>) {
+    private fun acceptedOrder(event: Event<Resource<MainResponse<OrderAccept<UserModel, MileageData>>>>) {
 
         event.getContentIfNotHandled()?.let { resource ->
 
@@ -124,6 +126,7 @@ class OrderFragment : Fragment(), BottomSheetInterface {
                     val orderSettings = resource.data?.data
                     orderSettings?.let { it1 -> preferenceManager.savePriceSettings(it1) }
 
+                    Log.d("malumot", "acceptedOrder: ${resource.data?.data?.mileage_prices}")
                     if (resource.data?.data?.latitude2 != null && resource.data.data.longitude2 != null) {
                         locationDestination2 = MapLocation(
                             resource.data.data.latitude2!!.toDouble(),

@@ -2,10 +2,10 @@ package com.example.taxi.domain.preference
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.util.Log
 import androidx.preference.PreferenceManager
 import com.example.taxi.domain.location.LocationPoint
 import com.example.taxi.domain.model.IsCompletedModel
+import com.example.taxi.domain.model.order.MileageData
 import com.example.taxi.domain.model.order.OrderAccept
 import com.example.taxi.domain.model.order.OrderCompleteRequest
 import com.example.taxi.domain.model.order.UserModel
@@ -13,6 +13,8 @@ import com.example.taxi.domain.model.register.confirm_password.UserData
 import com.example.taxi.domain.model.selfie.SelfieAllData
 import com.example.taxi.domain.model.selfie.StatusModel
 import com.example.taxi.utils.isMetric
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import org.json.JSONObject
 import java.util.Locale
 
@@ -58,10 +60,8 @@ class UserPreferenceManager(private val context: Context) {
         prefs.edit().putInt(START_COST, start_cost).apply()
     }
 
-    fun savePriceSettings(order: OrderAccept<UserModel>) {
+    fun savePriceSettings(order: OrderAccept<UserModel, MileageData>) {
 
-        Log.d("narx", "savePriceSettings: ichkarida ${order.start_cost}")
-        Log.d("narx", "savePriceSettings: har bir km ${order.getMinCost()}")
         with(prefs.edit()) {
 //
             if (order.getCostPerKm() == 0) putInt(COST_PER_KM, 2000) else putInt(
@@ -85,6 +85,7 @@ class UserPreferenceManager(private val context: Context) {
             putString(DESTINATION1_LAT, order.latitude1)
             putString(DESTINATION2_LAT, order.latitude2)
             putInt(ORDER_ID, order.id)
+            putString("mileage_data",convertToJsonMileageData(order.mileage_prices))
 //
             if (order.getCostMinWaitTimePerMinute() == 0) putInt(
                 COST_WAIT_TIME_PER_MINUTE, 500
@@ -94,6 +95,17 @@ class UserPreferenceManager(private val context: Context) {
         }.apply()
     }
 
+    private fun convertToJsonMileageData(mileageDataList: List<MileageData>): String {
+        val gson = Gson()
+        return gson.toJson(mileageDataList)
+    }
+
+    fun loadMileageData(): List<MileageData>? {
+        val gson = Gson()
+        val jsonString = prefs.getString("mileage_data", null)
+        val type = object : TypeToken<List<MileageData>>() {}.type
+        return gson.fromJson(jsonString, type)
+    }
     fun saveStatusIsTaximeter(isOn: Boolean) {
         prefs.edit().putBoolean(IS_TAXIMETER, isOn).apply()
     }

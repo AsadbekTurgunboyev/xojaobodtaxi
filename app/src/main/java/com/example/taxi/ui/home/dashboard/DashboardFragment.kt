@@ -35,6 +35,7 @@ import com.example.taxi.domain.model.IsCompletedModel
 import com.example.taxi.domain.model.MainResponse
 import com.example.taxi.domain.model.balance.BalanceData
 import com.example.taxi.domain.model.message.MessageResponse
+import com.example.taxi.domain.model.order.MileageData
 import com.example.taxi.domain.model.order.OrderAccept
 import com.example.taxi.domain.model.order.UserModel
 import com.example.taxi.domain.model.selfie.SelfieAllData
@@ -739,7 +740,7 @@ class DashboardFragment : Fragment() {
     }
 
 
-    private fun updateStatus(response: Resource<MainResponse<OrderAccept<UserModel>>?>?) {
+    private fun updateStatus(response: Resource<MainResponse<OrderAccept<UserModel, MileageData>>?>?) {
         when (response?.state) {
             ResourceState.LOADING -> {
 

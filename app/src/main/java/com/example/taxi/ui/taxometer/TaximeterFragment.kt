@@ -31,6 +31,7 @@ import com.example.taxi.domain.drive.currentDrive.CurrentDriveStatus
 import com.example.taxi.domain.location.LocationTracker
 import com.example.taxi.domain.model.DashboardData
 import com.example.taxi.domain.model.MainResponse
+import com.example.taxi.domain.model.order.MileageData
 import com.example.taxi.domain.model.order.OrderAccept
 import com.example.taxi.domain.model.order.UserModel
 import com.example.taxi.domain.preference.UserPreferenceManager
@@ -306,7 +307,7 @@ class TaximeterFragment : Fragment(), LocationTracker.LocationUpdateListener {
         }
     }
 
-    private fun acceptOrderUi(resourceEvent: Event<Resource<MainResponse<OrderAccept<UserModel>>>>?) {
+    private fun acceptOrderUi(resourceEvent: Event<Resource<MainResponse<OrderAccept<UserModel, MileageData>>>>?) {
         resourceEvent?.getContentIfNotHandled()?.let { resource ->
 
             when (resource.state) {

@@ -13,6 +13,7 @@ import com.example.taxi.databinding.DialogFinishOrderBinding
 import com.example.taxi.domain.location.LocationPoint
 import com.example.taxi.domain.model.BonusResponse
 import com.example.taxi.domain.model.MainResponse
+import com.example.taxi.domain.model.order.MileageData
 import com.example.taxi.domain.model.order.OrderCompleteRequest
 import com.example.taxi.domain.preference.UserPreferenceManager
 import com.example.taxi.ui.home.driver.DriverViewModel
@@ -29,6 +30,8 @@ class DriveFinishDialog(val raceId: Long, val viewModel: DriveReportViewModel) :
 
     var farCenterDistance = 0.0
     var order_history_id = 0
+    var distanceMerge:List<Pair<Int, Double>>? = emptyList()
+
 
     lateinit var viewBinding: DialogFinishOrderBinding
 
@@ -197,6 +200,19 @@ class DriveFinishDialog(val raceId: Long, val viewModel: DriveReportViewModel) :
 
         val centralPoint = preferenceManager.getCentralLocationPoint()
         val minDistanceInMeters = preferenceManager.getCenterRadius()?.toInt() ?: 0
+        if (centralPoint != null) {
+
+            distanceMerge = locationPoints?.let {
+                calculateDistancesDetailed(
+                    it,
+                    centralPoint.latitude, centralPoint.longitude, minDistanceInMeters
+                )
+            }
+
+
+
+
+        }
 
         if (centralPoint != null) {
             val farPoints =
@@ -205,6 +221,56 @@ class DriveFinishDialog(val raceId: Long, val viewModel: DriveReportViewModel) :
         }
     }
 
+
+    fun calculateDistancesDetailed(
+        locationPoints: List<LocationPoint>,
+        centerLat: Double,
+        centerLon: Double,
+        radius: Int
+    ): List<Pair<Int, Double>> {
+        val segments = mutableListOf<Pair<Int, Double>>()
+
+        for (i in 0 until locationPoints.size - 1) {
+            val point1 = locationPoints[i]
+            val point2 = locationPoints[i + 1]
+
+            val distance = haversineDistance(point1, point2)
+            val distanceFromCenter1 = haversineDistance(LocationPoint(centerLat, centerLon), point1)
+            val distanceFromCenter2 =
+                haversineDistance(LocationPoint(centerLat, centerLon), point2)
+
+            val locationStatus =
+                if (distanceFromCenter1 <= radius && distanceFromCenter2 <= radius) {
+                    0 // shahar ichida harakatlangan
+                } else {
+                    1 // shahar tashqarisida harakatlangan
+                }
+            segments.add(Pair(locationStatus, distance / 1000)) // km ga o'tkazamiz
+        }
+
+        return mergeSegments(segments)
+    }
+
+    private fun mergeSegments(segments: List<Pair<Int, Double>>): List<Pair<Int, Double>> {
+        if (segments.isEmpty()) return emptyList()
+
+        val mergedSegments = mutableListOf<Pair<Int, Double>>()
+        var currentStatus = segments[0].first
+        var currentDistance = 0.0
+
+        for (segment in segments) {
+            if (segment.first == currentStatus) {
+                currentDistance += segment.second
+            } else {
+                mergedSegments.add(Pair(currentStatus, currentDistance))
+                currentStatus = segment.first
+                currentDistance = segment.second
+            }
+        }
+        mergedSegments.add(Pair(currentStatus, currentDistance))
+
+        return mergedSegments
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -224,21 +290,18 @@ class DriveFinishDialog(val raceId: Long, val viewModel: DriveReportViewModel) :
             driveAnalyticsData.getTotalDistanceAsDouble() // Suppose it returns Double
         val minDistance = driveAnalyticsData.getMinDistanceAsKm(preferenceManager.getMinDistance())
 
-        Log.d(TAG, "renderAnalyticsReportData: totalDistance $totalDistance")
-        Log.d(TAG, "renderAnalyticsReportData: har bir km uchun narx $costPerKm")
-        Log.d(TAG, "renderAnalyticsReportData: minimal masofa $minDistance")
+
         val isDistance = totalDistance - (farCenterDistance / 1000.0)
         var totalInCenterDistance = 0.0
         if (isDistance > minDistance) {
             totalInCenterDistance = isDistance - (minDistance)
         }
 
-        if (isDistance < 0){
+        if (isDistance < 0) {
             farCenterDistance = totalDistance
-        }else{
+        } else {
             farCenterDistance /= 1000.toDouble()
         }
-        Log.d(TAG, "renderAnalyticsReportData: out masofa $farCenterDistance")
         val moneyForInDistance = (totalInCenterDistance) * costPerKm
         val moneyForFarDistance =
             (farCenterDistance) * preferenceManager.getCostOutCenter()
@@ -249,19 +312,18 @@ class DriveFinishDialog(val raceId: Long, val viewModel: DriveReportViewModel) :
         Log.d(TAG, "renderAnalyticsReportData: in Cost $moneyForInDistance")
         Log.d(TAG, "renderAnalyticsReportData: out Cost $moneyForFarDistance")
 
-        val moneyTotalDistance = totalDistance * costPerKm
-        val moneyWithKm: Int = TaxiCalculator.roundToNearestMultiple((moneyForInDistance + moneyForFarDistance).roundToInt())// This will also work
+
+        val moneyTotalDistance = preferenceManager.loadMileageData()
+            ?.let { distanceMerge?.let { it1 -> calculateTotalPrice(it1,it).roundToInt() } }
+            ?.let { TaxiCalculator.roundToNearestMultiple(it) }
+
+        val moneyWithKm: Int =
+            TaxiCalculator.roundToNearestMultiple((moneyForInDistance + moneyForFarDistance).roundToInt())// This will also work
+
+
 //        val moneyWithKm: Int =
 //            TaxiCalculator.roundToNearestMultiple(moneyTotalDistance.roundToInt())// This will also work
 
-        Log.d(
-            TAG,
-            "renderAnalyticsReportData: mijozgacha kutish vaqti ${ConversionUtil.getAllWaitTime()}"
-        )
-        Log.d(
-            TAG,
-            "renderAnalyticsReportData: ishda kutish vaqti ${driveAnalyticsData.getPauseTimeWithSecond()}"
-        )
         val waitTime = driveAnalyticsData.getPauseTimeWithSecond() + ConversionUtil.getAllWaitTime()
         val moneyWithTime =
             TaxiCalculator.roundToNearestMultiple(((waitTime / 60.toDouble()) * preferenceManager.getCostWaitTimePerMinute()).toInt())
@@ -273,7 +335,11 @@ class DriveFinishDialog(val raceId: Long, val viewModel: DriveReportViewModel) :
             if (preferenceManager.isHasDestinationSecond()) {
                 moneyWithTime + preferenceManager.getStartCost()
             } else {
-                moneyWithTime + moneyWithKm + preferenceManager.getStartCost()
+                if (moneyTotalDistance != null) {
+                    moneyWithTime + moneyTotalDistance + preferenceManager.getStartCost()
+                } else {
+                    moneyWithTime + preferenceManager.getStartCost()
+                }
             }
 
 
@@ -282,7 +348,7 @@ class DriveFinishDialog(val raceId: Long, val viewModel: DriveReportViewModel) :
         viewBinding.startcost.text =
             PhoneNumberUtil.formatMoneyNumberPlate(preferenceManager.getStartCost().toString())
         viewBinding.priceTripNoWait.text = PhoneNumberUtil.formatMoneyNumberPlate(
-            moneyWithKm.toString()
+            moneyTotalDistance.toString()
         )
 
         val order =
@@ -408,4 +474,36 @@ class DriveFinishDialog(val raceId: Long, val viewModel: DriveReportViewModel) :
     companion object {
         val TAG = "finishDialog"
     }
+
+    fun calculateTotalPrice(pairList: List<Pair<Int, Double>>, mileageData: List<MileageData>): Double {
+        var totalPrice = 0.0
+        var currentDistance = 0.0
+
+        pairList.forEach { pair ->
+            val (locationType, distance) = pair
+            var remainingDistance = distance
+
+            while (remainingDistance > 0) {
+                val nextDistance = currentDistance.toInt() + 1
+                val mileage = mileageData.find { it.value == nextDistance }
+                val mileageToUse = mileage ?: mileageData.last()
+
+                val distanceToNextKm = nextDistance - currentDistance
+                val travelDistance = minOf(remainingDistance, distanceToNextKm)
+
+                when (locationType) {
+                    0 -> totalPrice += mileageToUse.price * travelDistance
+                    1 -> totalPrice += mileageToUse.price_out_center * travelDistance
+                }
+
+                currentDistance += travelDistance
+                remainingDistance -= travelDistance
+            }
+        }
+
+
+        return totalPrice
+    }
+
+
 }
